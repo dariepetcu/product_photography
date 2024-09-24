@@ -7,8 +7,8 @@ from config import Config
 import os
 
 class ImageGenerator:
-    def __init__(self):
-        self.model = "a-turcu/varta:8e1d803a9c3b9e7c836fed8bc2a0fc5f1a44665012c7299dd97dc8ec0c8210a5"
+    def __init__(self, model):
+        self.model = model
         os.environ["REPLICATE_API_TOKEN"] = Config.REPLICATE_API_TOKEN
 
     def generate_images(self, prompt, num_outputs=1):
@@ -30,9 +30,9 @@ class ImageGenerator:
         print(f"Execution time: {time.time()-start_time} seconds")
         return output
 
-    def save_images(self, image_urls):
+    def save_images(self, image_urls, save_dir):
         for i, url in enumerate(image_urls):
             response = requests.get(url)
             image = Image.open(BytesIO(response.content))
-            image.save(f"{Config.SAVE_DIR}image_{i}.png")
-        print(f"Saved {len(image_urls)} images to {Config.SAVE_DIR}")
+            image.save(f"{save_dir}image_{i}.png")
+        print(f"Saved {len(image_urls)} images to {save_dir}")
