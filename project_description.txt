@@ -1,0 +1,3 @@
+Product Photo AI project description:
+
+Product Photo AI is a online tool for creating photos of your product by using AI. Product Photo AI is a webapp meant to be used by clients. It functions as a studio for generating photos of the client's product. In order to create a model of the product, the client is asked to input between 5 and 20 images of their product and a keyword that best describes their product. In the following hour, an AI model is trained on the images. When the model is ready, the client is able to prompt it in natural language, describing what the model should generate. The generated images are displayed and the client is able to save them.
