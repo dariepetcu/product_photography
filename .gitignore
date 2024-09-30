@@ -1,3 +1,4 @@
 
 backend/src/config.py
 *.pyc
+/backend/uploads

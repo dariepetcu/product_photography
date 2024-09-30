@@ -100,13 +100,13 @@ class FilePreparer:
 
     def make_archive(self):
     # Create object of ZipFile
-        with ZipFile(self.archive_path, 'w') as zip_object:
+        with ZipFile(self.zip_path, 'w') as zip_object:
             for file in self.prepared_files:
                 zip_object.write(file, os.path.basename(file))
                 text_file = file[:-4] + '.txt'
                 zip_object.write(text_file, os.path.basename(text_file))
 
-        print(f"Archive created at: {self.archive_path}")
+        print(f"Archive created at: {self.zip_path}")
 
     def parse_images(self):
         for filename in os.listdir(self.image_dir):

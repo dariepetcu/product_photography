@@ -1,18 +1,10 @@
-import React from 'react';
-import { ChakraProvider, Box, VStack, Heading } from '@chakra-ui/react';
-import ModelTrainingForm from './components/ModelTrainingForm';
+import ModelTrainingForm from 'src/components/ModelTrainingForm'
 
-function App() {
+export default function Home() {
   return (
-    <ChakraProvider>
-      <Box p={8}>
-        <VStack spacing={8}>
-          <Heading>Product Photo AI</Heading>
-          <ModelTrainingForm />
-        </VStack>
-      </Box>
-    </ChakraProvider>
-  );
+    <main className="flex min-h-screen flex-col items-center justify-center p-24">
+      <h1 className="mb-8 text-4xl font-bold">Model Training Application</h1>
+      <ModelTrainingForm />
+    </main>
+  )
 }
-
-export default App;

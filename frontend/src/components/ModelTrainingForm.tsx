@@ -1,159 +1,140 @@
-import React, { useState } from 'react';
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  FormControl,
-  FormLabel,
-  Input,
-  VStack,
-  Heading,
-  useToast,
-  Text,
-} from '@chakra-ui/react';
+import { useState } from "react"
+import { Button } from "src/components/ui/button"
+import { Input } from "src/components/ui/input"
+import { Label } from "src/components/ui/label"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "src/components/ui/card"
+import { AlertCircle } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "src/components/ui/alert"
 
-const ModelTrainingForm: React.FC = () => {
-  const [images, setImages] = useState<File[]>([]);
-  const [productName, setProductName] = useState('');
-  const [modelName, setModelName] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const toast = useToast();
+export default function Component() {
+  const [images, setImages] = useState<File[]>([])
+  const [product_name, setProductName] = useState("")
+  const [model_name, setModelName] = useState("")
+  const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [successMessage, setSuccessMessage] = useState("")
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      setImages(files);
+    const files = Array.from(e.target.files || [])
+    if (files.length < 5 || files.length > 10) {
+      setError("Please select 5-10 images.")
+      return
     }
-  };
+    setImages(files)
+    setError("")
+  }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    if (images.length < 5 || images.length > 10) {
-      toast({
-        title: "Invalid number of images",
-        description: "Please upload between 5 and 10 images.",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
-      setIsLoading(false);
-      return;
+  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const words = e.target.value.trim().split(/\s+/)
+    if (words.length > 2) {
+      setError("Please enter 1-2 words only.")
+      return
     }
+    setProductName(e.target.value)
+    setError("")
+  }
 
-    const formData = new FormData();
-    images.forEach((image, index) => {
-      formData.append(`image_${index}`, image);
-    });
-    formData.append('product_name', productName);
-    formData.append('model_name', modelName);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    setError("")
+    setSuccessMessage("")
 
     try {
-      console.log("Sending request to /api/training");
-      console.log("FormData contents:", Object.fromEntries(formData));
+      const formData = new FormData()
+      images.forEach((image, index) => {
+        formData.append(`image${index + 1}`, image)
+      })
+      formData.append("product_name", product_name)
+      formData.append("model_name", model_name)
 
-      const response = await fetch('/api/training', {
-        method: 'POST',
+      const response = await fetch("http://127.0.0.1:5000/api/training", {
+        method: "POST",
         body: formData,
-      });
+      })
 
-      console.log("Response status:", response.status);
-      console.log("Response headers:", response.headers);
-
-      const responseText = await response.text();
-      console.log("Response text:", responseText);
-
-      let result;
-      try {
-        result = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error("Error parsing JSON:", parseError);
-        throw new Error("Invalid JSON response from server: ${responseText}");
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      if (response.ok) {
-        toast({
-          title: "Success",
-          description: `Model created and trained successfully! Model ID: ${result.model_id}`,
-          status: "success",
-          duration: 5000,
-          isClosable: true,
-        });
-      } else {
-        throw new Error(result.error || 'Unknown server error');
-      }
+      const result = await response.json()
+      setSuccessMessage("Form submitted successfully!")
+      console.log("API Response:", result)
     } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : 'An unknown error occurred',
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
+      setError("An error occurred while submitting the form. Please try again.")
+      console.error("Submission error:", error)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
-    <Card maxW="md" mx="auto">
+    <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <Heading size="lg">Model Training Form</Heading>
+        <CardTitle>Image and Text Form</CardTitle>
       </CardHeader>
-      <CardBody>
-        <form onSubmit={handleSubmit}>
-          <VStack spacing={4}>
-            <FormControl>
-              <FormLabel htmlFor="images">Upload Images (5-10)</FormLabel>
-              <Input
-                id="images"
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleImageChange}
-                required
-              />
-              <Text fontSize="sm" color="gray.500" mt={1}>
-                {images.length} image(s) selected
-              </Text>
-            </FormControl>
-            <FormControl>
-              <FormLabel htmlFor="productName">Product Name (1-2 words)</FormLabel>
-              <Input
-                id="productName"
-                type="text"
-                value={productName}
-                onChange={(e) => setProductName(e.target.value)}
-                required
-              />
-            </FormControl>
-            <FormControl>
-              <FormLabel htmlFor="modelName">Model Name</FormLabel>
-              <Input
-                id="modelName"
-                type="text"
-                value={modelName}
-                onChange={(e) => setModelName(e.target.value)}
-                required
-              />
-            </FormControl>
-            <Button 
-              type="submit" 
-              colorScheme="blue" 
-              width="full"
-              isLoading={isLoading}
-              loadingText="Submitting"
-            >
-              Submit
-            </Button>
-          </VStack>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="images">Upload 5-10 Images</Label>
+            <Input
+              id="images"
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageChange}
+              className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+            />
+            {images.length > 0 && (
+              <p className="text-sm text-muted-foreground">{images.length} images selected</p>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="text">Descibe the product in 1-2 Words</Label>
+            <Input
+              id="text"
+              type="text"
+              value={product_name}
+              onChange={handleTextChange}
+              placeholder="Enter 1-2 words"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="model_name">Model Name</Label>
+            <Input
+              id="model_name"
+              type="text"
+              value={model_name}
+              onChange={(e) => setModelName(e.target.value)}
+              placeholder="Enter model name"
+            />
+          </div>
         </form>
-      </CardBody>
+      </CardContent>
+      <CardFooter className="flex flex-col items-start space-y-4">
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        {successMessage && (
+          <Alert variant="default">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Success</AlertTitle>
+            <AlertDescription>{successMessage}</AlertDescription>
+          </Alert>
+        )}
+        <Button 
+          type="submit" 
+          onClick={handleSubmit} 
+          className="w-full" 
+          disabled={isLoading}
+        >
+          {isLoading ? "Submitting..." : "Submit"}
+        </Button>
+      </CardFooter>
     </Card>
-  );
-};
-
-export default ModelTrainingForm;
+  )
+}

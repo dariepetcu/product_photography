@@ -17,14 +17,6 @@ logging.basicConfig(level=logging.DEBUG)
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-@app.errorhandler(Exception)
-def handle_exception(e):
-    # Log the exception
-    app.logger.error(f"An unhandled exception occurred: {str(e)}")
-    app.logger.error(traceback.format_exc())
-    # Return JSON instead of HTML for HTTP errors
-    return jsonify(error=str(e)), 500
-
 @app.route('/', methods=['GET'])
 def home():
     return jsonify({"message": "Welcome to the Product Photo AI API"}), 200
@@ -36,7 +28,8 @@ def process_images():
         app.logger.debug(f"Request form data: {request.form}")
         app.logger.debug(f"Request files: {request.files}")
 
-        if 'image_0' not in request.files:
+        if 'image1' not in request.files.keys():
+            app.logger.debug("no images")
             return jsonify({'error': 'No images uploaded'}), 400
 
         product_name = request.form.get('product_name')
@@ -52,7 +45,7 @@ def process_images():
 
         # Save uploaded images
         for key, file in request.files.items():
-            if key.startswith('image_'):
+            if key.startswith('image'):
                 filename = secure_filename(file.filename)
                 file_path = os.path.join(image_dir, filename)
                 file.save(file_path)
@@ -68,16 +61,14 @@ def process_images():
 
         # Train model
         app.logger.info("Training model...")
-        trainer = ModelTrainer(model_name, product_name)
+        #trainer = ModelTrainer(model_name, product_name)
         #model = trainer.create_model()
         #training = trainer.train_model(zip_path)
 
         app.logger.info("Training completed successfully")
         return jsonify({
             'message': 'Model created and trained successfully',
-            'model_id': "0",
-            'training_id': "0"
-        })
+        }), 200
 
     except Exception as e:
         app.logger.error(f"An error occurred: {str(e)}")
