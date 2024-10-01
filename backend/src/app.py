@@ -35,10 +35,11 @@ def train_model():
 
         product_name = request.form.get('product_name')
         model_name = request.form.get('model_name')
-
+    
         if not product_name or not model_name:
             return jsonify({'error': 'Missing product name or model name'}), 400
-
+        
+        trigger_word = f"TOK {product_name}"
         # Create directories
         model_dir = os.path.join(app.config['UPLOAD_FOLDER'], model_name)
         image_dir = os.path.join(model_dir, 'raw_images')
@@ -57,7 +58,7 @@ def train_model():
 
         # Prepare files
         app.logger.info("Preparing files...")
-        file_preparer = FilePreparer(zip_path, image_dir, f"TOK {product_name}")
+        file_preparer = FilePreparer(zip_path, image_dir, trigger_word)
         file_preparer.parse_images()
 
         # Train model
@@ -65,7 +66,7 @@ def train_model():
 
         # how to pass model between functions?
         global model_manager
-        model_manager = ModelManager(model_name, product_name)
+        model_manager = ModelManager(model_name, trigger_word)
         #model_manager.create_model()
         model_manager.train_model(zip_path)
 

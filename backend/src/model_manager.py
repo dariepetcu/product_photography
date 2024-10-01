@@ -48,7 +48,10 @@ class ModelManager:
             },
         )
     
+
+    #TODO this might be wrong because you have to retrieve training id each time you wanna check it
     def get_training_status(self):
+
         if self.training is None:
             return "No training started"
         return self.training.status
