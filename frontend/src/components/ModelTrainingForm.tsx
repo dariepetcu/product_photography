@@ -5,6 +5,7 @@ import { Label } from "src/components/ui/label"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "src/components/ui/card"
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "src/components/ui/alert"
+import { useNavigate } from "react-router-dom"
 
 export default function Component() {
   const [images, setImages] = useState<File[]>([])
@@ -13,11 +14,12 @@ export default function Component() {
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState("")
+  const navigate = useNavigate()
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
-    if (files.length < 5 || files.length > 10) {
-      setError("Please select 5-10 images.")
+    if (files.length < 5 || files.length > 20) {
+      setError("Please select 5-20 images.")
       return
     }
     setImages(files)
@@ -60,6 +62,8 @@ export default function Component() {
       const result = await response.json()
       setSuccessMessage("Form submitted successfully!")
       console.log("API Response:", result)
+      navigate(`/model-training-status/${model_name}`)
+
     } catch (error) {
       setError("An error occurred while submitting the form. Please try again.")
       console.error("Submission error:", error)
@@ -76,7 +80,7 @@ export default function Component() {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="images">Upload 5-10 Images</Label>
+            <Label htmlFor="images">Upload 5-20 Images</Label>
             <Input
               id="images"
               type="file"

@@ -3,7 +3,7 @@ from werkzeug.utils import secure_filename
 import os
 import logging
 from prepare_files import FilePreparer
-from model_trainer import ModelTrainer
+from model_manager import ModelManager
 from image_generator import ImageGenerator
 from flask_cors import CORS
 import traceback
@@ -21,8 +21,9 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def home():
     return jsonify({"message": "Welcome to the Product Photo AI API"}), 200
 
+
 @app.route('/api/training', methods=['POST'])
-def process_images():
+def train_model():
     app.logger.info("Received a request to /api/training")
     try:
         app.logger.debug(f"Request form data: {request.form}")
@@ -61,19 +62,34 @@ def process_images():
 
         # Train model
         app.logger.info("Training model...")
-        #trainer = ModelTrainer(model_name, product_name)
-        #model = trainer.create_model()
-        #training = trainer.train_model(zip_path)
 
-        app.logger.info("Training completed successfully")
+        # how to pass model between functions?
+        global model_manager
+        model_manager = ModelManager(model_name, product_name)
+        #model_manager.create_model()
+        model_manager.train_model(zip_path)
+
+        app.logger.info("Training started successfully")
         return jsonify({
-            'message': 'Model created and trained successfully',
+            'message': 'Training started successfully'
         }), 200
 
     except Exception as e:
         app.logger.error(f"An error occurred: {str(e)}")
         app.logger.error(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/training/status/<model_name>', methods=['GET'])
+def get_training_status(model_name):
+    try:
+        status = model_manager.get_training_status()
+        return jsonify({'status': status}), 200
+    except Exception as e:
+        app.logger.error(f"An error occurred while fetching status: {str(e)}")
+        app.logger.error(traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -127,5 +127,3 @@ class FilePreparer:
 
             # 4. Create zip file with all images and their captions.
             self.make_archive()
-
-

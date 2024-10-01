@@ -1,10 +1,17 @@
-import ModelTrainingForm from 'src/components/ModelTrainingForm'
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import ModelTrainingForm from './components/ModelTrainingForm';
+import ModelTrainingStatusPage from './components/ModelTrainingStatusPage';
 
-export default function Home() {
+function App() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="mb-8 text-4xl font-bold">Model Training Application</h1>
-      <ModelTrainingForm />
-    </main>
-  )
+    <Router>
+      <Routes>
+        <Route path="/" element={<ModelTrainingForm />} />
+        <Route path="/model-training-status/:model_name" element={<ModelTrainingStatusPage />} />
+      </Routes>
+    </Router>
+  );
 }
+
+export default App;

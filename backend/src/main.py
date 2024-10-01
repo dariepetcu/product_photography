@@ -1,5 +1,5 @@
 from image_generator import ImageGenerator
-from model_trainer import ModelTrainer
+from backend.src.model_manager import ModelManager
 from prepare_files import FilePreparer
 
 def main():
@@ -17,7 +17,7 @@ def main():
     file_preparer.parse_images()
 
     # Model Training
-    trainer = ModelTrainer(model_name, product_name)
+    trainer = ModelManager(model_name, product_name)
     model = trainer.create_model()
     training = trainer.train_model(zip_path)
     print(f"Training started: {training}")
